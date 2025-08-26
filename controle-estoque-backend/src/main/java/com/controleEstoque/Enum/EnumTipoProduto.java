@@ -8,5 +8,6 @@ public enum EnumTipoProduto {
     SHORT,
     BODY,
     CALCA,
-    ACESSORIO
+    ACESSORIO,
+    CAMISA
 }

@@ -27,6 +27,19 @@ public class ProdutoService {
         return produtosRepository.findAll();
     }
 
+    // Altera o método para retornar o produto deletado (ou vazio)
+    public Optional<Produtos> deletePorId(Long id) {
+        Optional<Produtos> produtoParaDeletar = produtosRepository.findById(id);
+        if (produtoParaDeletar.isPresent()) {
+            produtosRepository.deleteById(id);
+        }
+        return produtoParaDeletar;
+    }
+
+    public void deletePorNome(String nome){
+        produtosRepository.deleteByNomeProduto(nome);
+    }
+
     public void baixaEmEstoque(Long produtoId, int quantidade){
         Optional<Produtos> produtoOptional = produtosRepository.findById(produtoId);
 
@@ -36,7 +49,6 @@ public class ProdutoService {
             if (produto.getQuantidadeEstoque() >= quantidade){
                 produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - quantidade);
                 produtosRepository.save(produto);
-                System.out.println("Baixa de " + quantidade + " unidades no estoque do produto " + produto.getNomeProduto());
             }
             else {
                 throw new IllegalArgumentException("Estoque insuficiente para o produto: " + produto.getNomeProduto());
