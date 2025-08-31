@@ -1,0 +1,73 @@
+<div class="container">
+    <h1>Cadastro de Clientes</h1>
+
+    <!-- Formulário para Cadastrar Cliente -->
+    <section class="form-section">
+        <h2>Cadastrar Novo Cliente</h2>
+        <form #clienteForm="ngForm" (ngSubmit)="cadastrarCliente()">
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" name="nome" [(ngModel)]="novoCliente.nome" placeholder="Ex: João da Silva" required>
+
+            <label for="telefone">Telefone</label>
+            <input type="tel" id="telefone" name="telefone" [(ngModel)]="novoCliente.telefone" placeholder="Ex: (11) 99999-9999"
+                required>
+
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" [(ngModel)]="novoCliente.email" placeholder="Ex: joao@email.com"
+                required>
+
+            <label for="tipoCliente">Tipo de Documento</label>
+            <select id="tipoCliente" name="tipoCliente" [(ngModel)]="novoCliente.tipoCliente" required>
+                <option [value]="tipoClienteEnum.CPF">CPF</option>
+                <option [value]="tipoClienteEnum.CNPJ">CNPJ</option>
+            </select>
+
+            <label for="cpfCnpj">Número do Documento (CPF/CNPJ)</label>
+            <input type="text" id="cpfCnpj" name="cpfCnpj" [(ngModel)]="novoCliente.cpfCnpj" placeholder="CPF ou CNPJ"
+                required>
+
+            <label for="endereco">Endereço</label>
+            <input type="text" id="endereco" name="endereco" [(ngModel)]="novoCliente.endereco"
+                placeholder="Ex: Rua das Flores, 123" required>
+
+            <button type="submit" [disabled]="!clienteForm.form.valid">Cadastrar Cliente</button>
+        </form>
+        <p *ngIf="feedback" [ngStyle]="{'color': feedbackColor}">{{ feedback }}</p>
+    </section>
+
+    <hr>
+
+    <!-- Seção para Listar Clientes -->
+    <section class="list-section">
+        <h2>Clientes Cadastrados</h2>
+        <table id="clientes-tabela">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Telefone</th>
+                    <th>E-mail</th>
+                    <th>Tipo</th>
+                    <th>Documento</th>
+                    <th>Endereço</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let cliente of clientes">
+                    <td>{{ cliente.idPessoa }}</td>
+                    <td>{{ cliente.nome }}</td>
+                    <td>{{ cliente.telefone }}</td>
+                    <td>{{ cliente.email }}</td>
+                    <td>{{ cliente.tipoCliente }}</td>
+                    <td>{{ cliente.cpfCnpj }}</td>
+                    <td>{{ cliente.endereco }}</td>
+                    <td>
+                        <button (click)="deletarCliente(cliente)">Deletar</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p *ngIf="clientes.length === 0">Nenhum cliente cadastrado.</p>
+    </section>
+</div>
