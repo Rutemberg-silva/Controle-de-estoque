@@ -28,4 +28,11 @@ public class ClienteService {
         return clienteRepository.findById(id);
     }
 
+    public Optional<Cliente> removerCliente (Long id){
+        if(clienteRepository.existsById(id)){
+            clienteRepository.deleteById(id);
+        }
+        return clienteRepository.findById(id);
+    }
+
 }

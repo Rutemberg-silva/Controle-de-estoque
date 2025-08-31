@@ -2,9 +2,11 @@ package com.controleEstoque.entities;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-public class Pessoa {
+public class Pessoa implements Serializable {
     private String nome;
     private String email;
     private Long cpfCnpj;

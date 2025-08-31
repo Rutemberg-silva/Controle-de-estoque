@@ -11,8 +11,8 @@ public class Cliente extends Pessoa implements Serializable {
     private EnumTipoCliente tipoCliente;
 
 
-    public Cliente(String nome, String email, Long cpf, String endereco, Long telefone, EnumTipoCliente tipoCliente) {
-        super(nome, email, cpf, endereco, telefone);
+    public Cliente(String nome, String email, Long cpfCnpj, String endereco, Long telefone, EnumTipoCliente tipoCliente) {
+        super(nome, email, cpfCnpj, endereco, telefone);
         this.tipoCliente = tipoCliente;
     }
 
