@@ -35,8 +35,8 @@ export class ClienteComponent implements OnInit {
     telefone: '',
     email: '',
     tipoCliente: EnumTipoCliente.CPF,
-    cpfCnpj: '', // Novo campo para o CPF/CNPJ
-    endereco: '' // Novo campo para o endereço
+    cpfCnpj: '', 
+    endereco: '' 
   };
   feedback: string = '';
   feedbackColor: string = '';

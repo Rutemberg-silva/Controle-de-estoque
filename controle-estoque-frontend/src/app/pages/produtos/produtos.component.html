@@ -5,24 +5,31 @@
     <section class="form-section">
         <h2>Cadastrar Novo Produto</h2>
         <form #produtoForm="ngForm" (ngSubmit)="cadastrarProduto()">
+            <!-- Campo: Nome do Produto -->
             <label for="nomeProduto">Nome do Produto</label>
             <input type="text" id="nomeProduto" name="nomeProduto" [(ngModel)]="novoProduto.nomeProduto" placeholder="Ex: Vestido Floral" required>
             
+            <!-- Campo: Preço -->
             <label for="preco">Preço</label>
             <input type="number" id="preco" name="preco" [(ngModel)]="novoProduto.preco" placeholder="Ex: 120.50" required>
             
+            <!-- Campo: Quantidade em Estoque -->
             <label for="quantidade">Quantidade em Estoque</label>
             <input type="number" id="quantidade" name="quantidade" [(ngModel)]="novoProduto.quantidadeEstoque" placeholder="Ex: 50" required>
             
+            <!-- Campo: Cor -->
             <label for="cor">Cor</label>
             <input type="text" id="cor" name="cor" [(ngModel)]="novoProduto.cor" placeholder="Ex: Azul">
             
+            <!-- Campo: Fornecedor -->
             <label for="fornecedor">Fornecedor</label>
             <input type="text" id="fornecedor" name="fornecedor" [(ngModel)]="novoProduto.fornecedor" placeholder="Ex: Moda e Cia">
             
+            <!-- Campo: Descrição -->
             <label for="descricao">Descrição</label>
             <input type="text" id="descricao" name="descricao" [(ngModel)]="novoProduto.descricao" placeholder="Ex: Vestido de algodão, tamanho M">
             
+            <!-- Campo: Tipo de Produto (Dropdown) -->
             <label for="tipoProduto">Tipo do Produto</label>
             <select id="tipoProduto" name="tipoProduto" [(ngModel)]="novoProduto.tipoProduto">
                 <option value="" disabled>Selecione o Tipo</option>
@@ -39,6 +46,10 @@
     <!-- Seção para Listar Produtos -->
     <section class="list-section">
         <h2>Produtos em Estoque</h2>
+        <div class="actions">
+            <button (click)="buscarPorNome()">Buscar Produto por Nome</button>
+            <button (click)="fetchProdutos()">Mostrar Todos os Produtos</button>
+        </div>
         <table id="produtos-tabela">
             <thead>
                 <tr>
@@ -50,7 +61,6 @@
                     <th>Fornecedor</th>
                     <th>Descrição</th>
                     <th>Tipo</th>
-                    <th>Ações</th> <!-- Nova coluna para os botões de ação -->
                 </tr>
             </thead>
             <tbody>
@@ -63,23 +73,9 @@
                     <td>{{ produto.fornecedor }}</td>
                     <td>{{ produto.descricao }}</td>
                     <td>{{ produto.tipoProduto }}</td>
-                    <td>
-                        <!-- Botão para dar baixa no estoque -->
-                        <button class="action-button" (click)="darBaixaNoEstoque(produto.id)">Baixa</button>
-                        <!-- Botão para deletar o produto -->
-                        <button class="action-button delete-button" (click)="deletarProduto(produto.id)">Excluir</button>
-                    </td>
                 </tr>
             </tbody>
         </table>
         <p *ngIf="produtos.length === 0">Nenhum produto cadastrado.</p>
-    </section>
-    
-    <hr>
-    
-    <!-- Seção para Buscar Produto por ID -->
-    <section class="search-section">
-      <h2>Buscar Produto por ID</h2>
-      <button class="action-button" (click)="buscarPorId()">Buscar Produto</button>
     </section>
 </div>

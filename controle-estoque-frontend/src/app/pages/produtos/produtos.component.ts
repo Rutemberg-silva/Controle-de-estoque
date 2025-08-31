@@ -25,6 +25,7 @@ interface Produtos {
 export class ProdutoComponent implements OnInit {
 
     produtos: Produtos[] = [];
+    produtoEncontrado: Produtos | null = null; // Adicionado para exibir o produto encontrado
 
     // Lista de tipos de produto do seu Enum do backend
     tiposProduto: string[] = ['VESTIDO', 'BLUSA', 'SAIA', 'PERFUME', 'SHORT', 'BODY', 'CALCA', 'ACESSORIO'];
@@ -54,6 +55,7 @@ export class ProdutoComponent implements OnInit {
         this.http.get<Produtos[]>(this.apiUrl).subscribe({
             next: (data) => {
                 this.produtos = data;
+                this.produtoEncontrado = null; // Limpa o produto encontrado
             },
             error: (err) => {
                 console.error('Erro ao buscar produtos', err);
@@ -79,7 +81,6 @@ export class ProdutoComponent implements OnInit {
         });
     }
 
-    // Método para dar baixa no estoque
     darBaixaNoEstoque(id: number | undefined): void {
         if (!id) {
             this.feedback = 'ID do produto não encontrado.';
@@ -107,7 +108,6 @@ export class ProdutoComponent implements OnInit {
         }
     }
 
-    // Método para deletar um produto
     deletarProduto(id: number | undefined): void {
         if (!id) {
             this.feedback = 'ID do produto não encontrado.';
@@ -116,10 +116,9 @@ export class ProdutoComponent implements OnInit {
         }
 
         if (confirm('Tem certeza que deseja apagar este produto?')) {
-            // Remova a opção { responseType: 'text' }
-            this.http.delete<Produtos>(`${this.apiUrl}/${id}/delete`).subscribe({
-                next: (produtoDeletado) => {
-                    this.feedback = `Produto "${produtoDeletado.nomeProduto}" deletado com sucesso!`;
+            this.http.delete(`${this.apiUrl}/${id}/delete`, { responseType: 'text' }).subscribe({
+                next: (response) => {
+                    this.feedback = response; 
                     this.feedbackColor = 'green';
                     this.fetchProdutos(); // Atualiza a lista
                 },
@@ -132,7 +131,6 @@ export class ProdutoComponent implements OnInit {
         }
     }
 
-    // NOVO: Método para buscar produto por ID
     buscarPorId(): void {
       const idStr = prompt('Digite o ID do produto que deseja buscar:');
       const id = parseInt(idStr || '0');
@@ -142,22 +140,46 @@ export class ProdutoComponent implements OnInit {
           next: (produtoEncontrado) => {
             this.feedback = `Produto "${produtoEncontrado.nomeProduto}" encontrado!`;
             this.feedbackColor = 'blue';
-            // Você pode adicionar a lógica para exibir os detalhes do produto,
-            // por exemplo, em uma modal ou em uma nova seção na página.
-            // Por enquanto, apenas atualizamos o feedback e a lista de produtos
             this.produtos = [produtoEncontrado];
+            this.produtoEncontrado = produtoEncontrado; // Exibe o produto encontrado
           },
           error: (err) => {
             console.error('Erro ao buscar produto por ID', err);
             this.feedback = 'Produto não encontrado.';
             this.feedbackColor = 'red';
-            this.produtos = []; // Limpa a lista se o produto não for encontrado
+            this.produtos = [];
+            this.produtoEncontrado = null;
           }
         });
       }
     }
 
-    // Método para limpar os campos do formulário
+    buscarPorNome(): void {
+        const nomeProduto = prompt('Digite o nome do produto que deseja buscar:');
+        if (nomeProduto && nomeProduto.trim().length > 0) { // Adicionada a verificação aqui
+            this.http.get<Produtos>(`${this.apiUrl}/nome/${nomeProduto}`).subscribe({
+                next: (produtoEncontrado) => {
+                    this.feedback = `Produto "${produtoEncontrado.nomeProduto}" encontrado!`;
+                    this.feedbackColor = 'blue';
+                    this.produtos = [produtoEncontrado];
+                    this.produtoEncontrado = produtoEncontrado;
+                },
+                error: (err) => {
+                    console.error('Erro ao buscar produto por nome', err);
+                    this.feedback = 'Produto não encontrado.';
+                    this.feedbackColor = 'red';
+                    this.produtos = [];
+                    this.produtoEncontrado = null;
+                }
+            });
+        } else {
+            this.feedback = 'Busca cancelada ou nome do produto não fornecido.';
+            this.feedbackColor = 'orange';
+            this.produtos = [];
+            this.produtoEncontrado = null;
+        }
+    }
+
     private limparFormulario(): void {
         this.novoProduto = {
             nomeProduto: '', 

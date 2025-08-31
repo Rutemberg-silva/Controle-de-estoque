@@ -27,6 +27,10 @@ public class ProdutoService {
         return produtosRepository.findAll();
     }
 
+    public Optional<Produtos> buscarPorNome(String nome){
+        return produtosRepository.findByNomeProduto(nome);
+    }
+
     // Altera o método para retornar o produto deletado (ou vazio)
     public Optional<Produtos> deletePorId(Long id) {
         Optional<Produtos> produtoParaDeletar = produtosRepository.findById(id);
