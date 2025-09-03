@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 
 // Interface para definir a estrutura de um produto
 interface Produtos {
@@ -25,8 +26,7 @@ interface Produtos {
 export class ProdutoComponent implements OnInit {
 
     produtos: Produtos[] = [];
-    produtoEncontrado: Produtos | null = null; // Adicionado para exibir o produto encontrado
-
+    
     // Lista de tipos de produto do seu Enum do backend
     tiposProduto: string[] = ['VESTIDO', 'BLUSA', 'SAIA', 'PERFUME', 'SHORT', 'BODY', 'CALCA', 'ACESSORIO'];
 
@@ -40,7 +40,12 @@ export class ProdutoComponent implements OnInit {
         descricao: '',
         tipoProduto: ''
     };
-    
+
+    // Variáveis para as novas funcionalidades
+    idParaBaixa: number | null = null;
+    quantidadeParaBaixa: number = 0;
+    nomeParaBusca: string = '';
+
     feedback: string = '';
     feedbackColor: string = '';
     private apiUrl = 'http://localhost:8080/api/produtos';
@@ -55,7 +60,6 @@ export class ProdutoComponent implements OnInit {
         this.http.get<Produtos[]>(this.apiUrl).subscribe({
             next: (data) => {
                 this.produtos = data;
-                this.produtoEncontrado = null; // Limpa o produto encontrado
             },
             error: (err) => {
                 console.error('Erro ao buscar produtos', err);
@@ -81,33 +85,56 @@ export class ProdutoComponent implements OnInit {
         });
     }
 
-    darBaixaNoEstoque(id: number | undefined): void {
-        if (!id) {
-            this.feedback = 'ID do produto não encontrado.';
+    // Método para dar baixa no estoque usando o formulário
+    darBaixaNoEstoque(): void {
+        if (!this.idParaBaixa || this.quantidadeParaBaixa <= 0) {
+            this.feedback = 'ID e quantidade para baixa devem ser válidos.';
             this.feedbackColor = 'red';
             return;
         }
-
-        const quantidadeStr = prompt('Quantos itens você quer dar baixa?');
-        const quantidade = parseInt(quantidadeStr || '0');
-
-        if (quantidade > 0) {
-            const params = new HttpParams().set('quantidade', quantidade.toString());
-            this.http.put<Produtos>(`${this.apiUrl}/${id}/baixa`, {}, { params: params }).subscribe({
-                next: (produtoAtualizado) => {
-                    this.feedback = `Baixa de ${quantidade} itens do produto "${produtoAtualizado.nomeProduto}" realizada com sucesso!`;
-                    this.feedbackColor = 'green';
-                    this.fetchProdutos(); // Atualiza a lista
-                },
-                error: (err) => {
-                    console.error('Erro ao dar baixa no estoque', err);
-                    this.feedback = err.error || 'Erro ao dar baixa no estoque.';
-                    this.feedbackColor = 'red';
-                }
-            });
-        }
+        
+        const params = new HttpParams().set('quantidade', this.quantidadeParaBaixa.toString());
+        this.http.put<Produtos>(`${this.apiUrl}/${this.idParaBaixa}/baixa`, {}, { params: params }).subscribe({
+            next: (produtoAtualizado) => {
+                this.feedback = `Baixa de ${this.quantidadeParaBaixa} itens do produto "${produtoAtualizado.nomeProduto}" realizada com sucesso!`;
+                this.feedbackColor = 'green';
+                this.fetchProdutos(); // Atualiza a lista
+                this.idParaBaixa = null;
+                this.quantidadeParaBaixa = 0;
+            },
+            error: (err) => {
+                console.error('Erro ao dar baixa no estoque', err);
+                this.feedback = err.error || 'Erro ao dar baixa no estoque.';
+                this.feedbackColor = 'red';
+            }
+        });
     }
 
+    // Novo método para dar baixa de 1 unidade diretamente da tabela
+    darBaixaRapida(id: number | undefined): void {
+        if (!id) {
+            this.feedback = 'ID do produto não encontrado para dar baixa rápida.';
+            this.feedbackColor = 'red';
+            return;
+        }
+        
+        const quantidadeParaBaixa = 1;
+        const params = new HttpParams().set('quantidade', quantidadeParaBaixa.toString());
+        this.http.put<Produtos>(`${this.apiUrl}/${id}/baixa`, {}, { params: params }).subscribe({
+            next: (produtoAtualizado) => {
+                this.feedback = `Baixa de 1 item do produto "${produtoAtualizado.nomeProduto}" realizada com sucesso!`;
+                this.feedbackColor = 'green';
+                this.fetchProdutos(); // Atualiza a lista
+            },
+            error: (err) => {
+                console.error('Erro ao dar baixa no estoque', err);
+                this.feedback = err.error || 'Erro ao dar baixa no estoque.';
+                this.feedbackColor = 'red';
+            }
+        });
+    }
+
+    // Método para deletar um produto
     deletarProduto(id: number | undefined): void {
         if (!id) {
             this.feedback = 'ID do produto não encontrado.';
@@ -115,68 +142,45 @@ export class ProdutoComponent implements OnInit {
             return;
         }
 
-        if (confirm('Tem certeza que deseja apagar este produto?')) {
-            this.http.delete(`${this.apiUrl}/${id}/delete`, { responseType: 'text' }).subscribe({
-                next: (response) => {
-                    this.feedback = response; 
-                    this.feedbackColor = 'green';
-                    this.fetchProdutos(); // Atualiza a lista
-                },
-                error: (err) => {
-                    console.error('Erro ao deletar produto', err);
-                    this.feedback = err.error || 'Erro ao deletar produto.';
-                    this.feedbackColor = 'red';
-                }
-            });
-        }
-    }
-
-    buscarPorId(): void {
-      const idStr = prompt('Digite o ID do produto que deseja buscar:');
-      const id = parseInt(idStr || '0');
-
-      if (id > 0) {
-        this.http.get<Produtos>(`${this.apiUrl}/${id}`).subscribe({
-          next: (produtoEncontrado) => {
-            this.feedback = `Produto "${produtoEncontrado.nomeProduto}" encontrado!`;
-            this.feedbackColor = 'blue';
-            this.produtos = [produtoEncontrado];
-            this.produtoEncontrado = produtoEncontrado; // Exibe o produto encontrado
-          },
-          error: (err) => {
-            console.error('Erro ao buscar produto por ID', err);
-            this.feedback = 'Produto não encontrado.';
-            this.feedbackColor = 'red';
-            this.produtos = [];
-            this.produtoEncontrado = null;
-          }
+        this.http.delete(`${this.apiUrl}/${id}/delete`, { responseType: 'text' }).subscribe({
+            next: (response) => {
+                this.feedback = response; 
+                this.feedbackColor = 'green';
+                this.fetchProdutos(); // Atualiza a lista
+            },
+            error: (err) => {
+                console.error('Erro ao deletar produto', err);
+                this.feedback = err.error || 'Erro ao deletar produto.';
+                this.feedbackColor = 'red';
+            }
         });
-      }
     }
 
     buscarPorNome(): void {
-        const nomeProduto = prompt('Digite o nome do produto que deseja buscar:');
-        if (nomeProduto && nomeProduto.trim().length > 0) { // Adicionada a verificação aqui
-            this.http.get<Produtos>(`${this.apiUrl}/nome/${nomeProduto}`).subscribe({
-                next: (produtoEncontrado) => {
-                    this.feedback = `Produto "${produtoEncontrado.nomeProduto}" encontrado!`;
-                    this.feedbackColor = 'blue';
-                    this.produtos = [produtoEncontrado];
-                    this.produtoEncontrado = produtoEncontrado;
+        if (this.nomeParaBusca && this.nomeParaBusca.trim().length > 0) {
+            this.http.get<Produtos[]>(`${this.apiUrl}/nome/${this.nomeParaBusca}`).subscribe({
+                next: (produtosEncontrados) => {
+                    if (produtosEncontrados.length > 0) {
+                        this.feedback = `${produtosEncontrados.length} produto(s) encontrado(s)!`;
+                        this.feedbackColor = 'blue';
+                        this.produtos = produtosEncontrados;
+                    } else {
+                        this.feedback = 'Nenhum produto encontrado com este nome.';
+                        this.feedbackColor = 'red';
+                        this.produtos = [];
+                    }
                 },
                 error: (err) => {
                     console.error('Erro ao buscar produto por nome', err);
-                    this.feedback = 'Produto não encontrado.';
+                    this.feedback = 'Erro ao buscar produto por nome. Verifique o servidor.';
                     this.feedbackColor = 'red';
                     this.produtos = [];
-                    this.produtoEncontrado = null;
                 }
             });
         } else {
-            this.feedback = 'Busca cancelada ou nome do produto não fornecido.';
+            this.feedback = 'Nome do produto não fornecido.';
             this.feedbackColor = 'orange';
-            this.produtos = [];
-            this.produtoEncontrado = null;
+            this.fetchProdutos(); // Retorna para a lista completa
         }
     }
 

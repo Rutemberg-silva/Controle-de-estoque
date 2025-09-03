@@ -38,7 +38,6 @@
 
             <button type="submit" [disabled]="!produtoForm.form.valid">Cadastrar Produto</button>
         </form>
-        <p *ngIf="feedback" [ngStyle]="{'color': feedbackColor}">{{ feedback }}</p>
     </section>
 
     <hr>
@@ -47,9 +46,13 @@
     <section class="list-section">
         <h2>Produtos em Estoque</h2>
         <div class="actions">
-            <button (click)="buscarPorNome()">Buscar Produto por Nome</button>
-            <button (click)="fetchProdutos()">Mostrar Todos os Produtos</button>
+            <input type="text" [(ngModel)]="nomeParaBusca" placeholder="Buscar por nome">
+            <button (click)="buscarPorNome()">Buscar Produto</button>
+            <button (click)="fetchProdutos()">Mostrar Todos</button>
         </div>
+        
+        <p *ngIf="feedback" [ngStyle]="{'color': feedbackColor}">{{ feedback }}</p>
+
         <table id="produtos-tabela">
             <thead>
                 <tr>
@@ -61,6 +64,7 @@
                     <th>Fornecedor</th>
                     <th>Descrição</th>
                     <th>Tipo</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -73,9 +77,28 @@
                     <td>{{ produto.fornecedor }}</td>
                     <td>{{ produto.descricao }}</td>
                     <td>{{ produto.tipoProduto }}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="action-btn delete-btn" (click)="deletarProduto(produto.id)">Deletar</button>
+                        </div>
+                    </td>
                 </tr>
             </tbody>
         </table>
         <p *ngIf="produtos.length === 0">Nenhum produto cadastrado.</p>
+    </section>
+
+    <hr>
+
+    <!-- Seção para Dar Baixa no Estoque -->
+    <section class="form-section">
+        <h2>Dar Baixa no Estoque</h2>
+        <label for="idParaBaixa">ID do Produto</label>
+        <input type="number" id="idParaBaixa" name="idParaBaixa" [(ngModel)]="idParaBaixa" placeholder="Ex: 1" required>
+
+        <label for="quantidadeParaBaixa">Quantidade para Baixa</label>
+        <input type="number" id="quantidadeParaBaixa" name="quantidadeParaBaixa" [(ngModel)]="quantidadeParaBaixa" placeholder="Ex: 5" required>
+        
+        <button (click)="darBaixaNoEstoque()">Confirmar Baixa</button>
     </section>
 </div>
